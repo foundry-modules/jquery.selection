@@ -1,6 +1,6 @@
 $.template("selection/box", '<div data-selection-box></div>');
 
-$.Controler("Selection",
+$.Controller("Selection",
 {
 	pluginName: "selection",
 	hostname: "selection",
@@ -36,8 +36,6 @@ $.Controler("Selection",
 function(self) { return {
 
 	init: function() {
-
-		self.setLayout();
 	},
 
 	disabled: false,
@@ -126,7 +124,9 @@ function(self) { return {
 		// autoWidth/autoHeight, minWidth/minHeight & aspectRatio constrains.
 		area.width  = Math.max(area.width , minWidth , ((autodraw) ? autoWidth  : 0));
 		area.height = Math.max(area.height, minHeight, ((autodraw) ? autoHeight : 0));
-		if (aspectRatio) { area.width = area.height * aspectRatio; }	
+
+		// Aspect ratio correction
+		if (aspectRatio) { area.width = area.height * aspectRatio; }
 
 		// If we're autodrawing selection,
 		// this ensures selection appears at the center of the cursor
@@ -162,6 +162,22 @@ function(self) { return {
 			// Resize tag
 			area.width  = area.right  - area.left;
 			area.height = area.bottom - area.top;
+
+			// Aspect ratio correction
+			if (aspectRatio) {
+
+				// If width correction results inbleeding
+				if ((area.left + area.height * aspectRatio) > viewport.right) {
+					// correct area height
+					area.height = area.width / aspectRatio;
+				} else {
+					area.width = area.height * aspectRatio;
+				}
+
+				// Ensure they don't go out of bounds
+				area.bottom = area.height + area.top;
+				area.right  = area.width  + area.left;
+			}
 		}
 
 		// Reposition tag
@@ -373,6 +389,10 @@ function(self) { return {
 
 	"{window} mousemove": function(el, event) {
 
+		var selection = self.selection();
+
+		if (selection.length < 1) return;
+
 		// Switch cursor between crosshair & move
 		if (self.options.spotlight) {
 			self.selection()
@@ -381,7 +401,7 @@ function(self) { return {
 	},
 
 	"{window} keydown": function(el, event) {
-		
+
 		if (event.keyCode==27) {
 			self.removeSelection();
 		}
