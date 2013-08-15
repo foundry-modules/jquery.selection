@@ -166,7 +166,7 @@ function(self) { return {
 			// Aspect ratio correction
 			if (aspectRatio) {
 
-				// If width correction results inbleeding
+				// If width correction results in bleeding
 				if ((area.left + area.height * aspectRatio) > viewport.right) {
 					// correct area height
 					area.height = area.width / aspectRatio;
